@@ -1,0 +1,171 @@
+{
+  "_id": "645c9572da79280028c2bb35",
+  "workflow": {
+    "source": {
+      "name": "",
+      "service": "github",
+      "accountId": "63886d185149ad002bdd04f8",
+      "workspace": "",
+      "workspaceName": "",
+      "repository": "Oracle-fusion68",
+      "repoId": "ramyaj726/Oracle-fusion68",
+      "projectId": "ramyaj726/Oracle-fusion68",
+      "gitUrl": "https://github.com/ramyaj726/Oracle-fusion68",
+      "sshUrl": "git@github.com:ramyaj726/Oracle-fusion68.git",
+      "branch": "feature25",
+      "secondary_branches": [],
+      "key": "",
+      "trigger_active": false,
+      "isPushEvent": true,
+      "isPrEvent": false,
+      "isMonitored": false,
+      "prCreatedEvent": true,
+      "prApprovedEvent": false,
+      "gitExportEnabled": true,
+      "gitExportPath": "test",
+      "dynamicSettings": false,
+      "allowDynamicSettingsInUi": true,
+      "enableBranchSwitch": false
+    },
+    "schedule": {
+      "start_date": null,
+      "end_date": null,
+      "frequency": ""
+    },
+    "last_step": {
+      "status": "stopped",
+      "step_id": "651141125fb22d00b2c4eec5",
+      "check_count": 3,
+      "running": {},
+      "failed": {
+        "step_id": "651141125fb22d00b2c4eec5",
+        "activity_id": "6548c45b95559b00170efd54",
+        "status": "failed",
+        "updatedAt": "2023-11-06T10:47:55.602Z"
+      },
+      "success": {}
+    },
+    "last_run": {
+      "completed": "2023-11-06T10:47:55.706Z",
+      "run_count": 59,
+      "status": "failed"
+    },
+    "plan": [
+      {
+        "trigger": [],
+        "type": [
+          "oracle_fusion_cloud"
+        ],
+        "notification": [],
+        "_id": "651141125fb22d00b2c4eec5",
+        "tool": {
+          "tool_identifier": "oracle_fusion_report_migration",
+          "configuration": {
+            "migrationType": "pull_reports",
+            "sourceInstanceToolId": "64d2350caa0f1b002d9fec12",
+            "sourceInstancePath": "",
+            "sourceInstanceReports": [],
+            "targetInstanceToolId": "",
+            "targetInstancePath": "",
+            "artifactStepId": "",
+            "service": "github",
+            "gitToolId": "63886d185149ad002bdd04f8",
+            "repoId": "ramyaj726/Oracle-fusion",
+            "repository": "Oracle-fusion",
+            "gitBranch": "feature30",
+            "sshUrl": "git@github.com:ramyaj726/Oracle-fusion.git",
+            "gitUrl": "https://github.com/ramyaj726/Oracle-fusion",
+            "gitCommitId": "00ac26af8a5df699d55bece9f29a60b7dc3c2724",
+            "nexusToolConfigId": "",
+            "useExistingGroupName": false,
+            "groupName": "",
+            "repositoryGroup": "maven2",
+            "repositoryName": "",
+            "artifactoryType": "",
+            "reportArtifactList": []
+          },
+          "job": null
+        },
+        "name": "Copy of Push the reports to Nexus instance",
+        "description": "",
+        "active": true,
+        "tags": [
+          {
+            "type": "pipeline",
+            "value": "copy-of-push-the-reports-to-nexus-instance_651141125fb22d00b2c4eec5"
+          }
+        ],
+        "updatedAt": "2023-09-25T08:13:06.681Z",
+        "orchestration_type": "standard"
+      },
+      {
+        "trigger": [],
+        "type": [
+          "oracle_fusion_cloud"
+        ],
+        "notification": [],
+        "_id": "653f4086ef874a001756c829",
+        "tool": {
+          "tool_identifier": "oracle_fusion_report_migration",
+          "configuration": {
+            "migrationType": "push_reports",
+            "sourceInstanceToolId": "",
+            "sourceInstancePath": "",
+            "sourceInstanceReports": [],
+            "targetInstanceToolId": "",
+            "targetInstancePath": "",
+            "artifactStepId": "651141125fb22d00b2c4eec5",
+            "service": "github",
+            "gitToolId": "",
+            "repoId": "",
+            "repository": "",
+            "gitBranch": "",
+            "sshUrl": "",
+            "gitUrl": "",
+            "gitCommitId": "",
+            "nexusToolConfigId": "645b27f998258f00281ae75b",
+            "useExistingGroupName": false,
+            "groupName": "hello",
+            "repositoryGroup": "maven2",
+            "repositoryName": "fusion",
+            "artifactoryType": "nexus",
+            "reportArtifactList": []
+          },
+          "job": null
+        },
+        "name": "Oracle Fusion",
+        "description": "",
+        "active": true,
+        "tags": [
+          {
+            "type": "pipeline",
+            "value": "oracle-fusion_653f4086ef874a001756c829"
+          }
+        ],
+        "updatedAt": "2023-10-30T05:35:02.964Z",
+        "orchestration_type": "standard"
+      }
+    ],
+    "run_count": 59
+  },
+  "tags": [],
+  "type": [
+    "oracle_fusion"
+  ],
+  "owner": "61ddd20db8787f0011c70e57",
+  "roles": [],
+  "organizationName": "yandex qa",
+  "account": "org102-acc",
+  "name": "REG_Oracle_Fusion_Pull/Push_Step",
+  "template": "600ed1343b1f1ff3ed3d18d6",
+  "description": "New Template desc",
+  "project": {
+    "name": "",
+    "project_id": ""
+  },
+  "active": true,
+  "__v": 0,
+  "owner_name": "Natallia Murashka",
+  "createdAt": "2023-05-11T07:12:50.081Z",
+  "updatedAt": "2023-11-06T15:49:26.288Z"
+}
