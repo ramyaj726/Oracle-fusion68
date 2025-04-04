@@ -1,0 +1,127 @@
+name: CODE_SCAN_65a97ea5f8af9202d350d195_5ec7c8cedc73d971e2860b68
+on:
+  workflow_dispatch:
+    inputs:
+      sonar_project_key:
+        required: false
+        description: Project key
+      sonar_project_name:
+        required: false
+        description: Project Name
+      sonar_host_url:
+        required: false
+        description: Sonar host url
+      sonar_source_path:
+        required: false
+        description: Sonar Source Path
+      sonar_artifact_dir:
+        required: false
+        description: Sonar Source Directory
+      opsera_pipeline_id:
+        required: false
+        description: Opsera pipeline id
+      opsera_step_id:
+        required: false
+        description: Opsera step id
+      opsera_pipeline_run_count:
+        required: false
+        description: Opsera pipeline run count
+env:
+#   # This item has no matching transformer
+#   com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper:
+#   # TimestamperBuildWrapper was not converted because the behavior is available by default in GitHub Actions and/or it is not configurable
+jobs:
+  build:
+    runs-on:
+      - ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+      with:
+        fetch-depth: 0
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@v2.1.0
+      env:
+        SONAR_TOKEN: "${{ secrets.SONAR_TOKEN }}"
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        SONARCLOUD_URL: "${{ secrets.SONAR_URL }}"
+      with:
+        args: |-
+          #WARNING: projectKey is a required field, ensure it is configured here or in your project file
+          -Dsonar.projectKey='<<INSERT KEY HERE>>'/`
+          -Dsonar.host.url='${{ secrets.SONAR_URL }}'/`
+          -Dsonar.login=${{ env.SONAR_TOKEN }}/`
+          -Dsonar.host.url=$sonar_host_url -Dsonar.login  =$sonar_token -Dsonar.projectKey =$sonar_project_key -Dsonar.projectName=$sonar_project_name -Dsonar.sources=$sonar_source_path -Dsonar.projectBaseDir=$sonar_artifact_dir -Dsonar.java.binaries = / -D$sonar_source_branch -D$sonar_custom_parameters
+    - name: run command
+      shell: bash
+      run: |-
+        #!/usr/bin/env bash
+        set +x
+        REPORT_PATH=".scannerwork/report-task.txt"
+        CE_TASK_ID_KEY="ceTaskId="
+        if [[ -z $(jq --version) ]]; then
+            sudo apt-get install -y jq
+        fi
+        SLEEP_TIME=30
+        SONAR_URL=${{ env.sonar_host_url }}
+        # removing the slash at the end if available.
+        if [ ${SONAR_URL: -1} = "/" ]; then
+            SONAR_URL=${SONAR_URL:0:${#SONAR_URL}-1}
+        fi
+        echo "Using SonarQube instance ${{ env.SONAR_URL }}"
+        echo "Using SonarQube access token ${{ env.sonar_token }}"
+        # get the compute engine task id
+        ce_task_id=$(cat $REPORT_PATH | grep $CE_TASK_ID_KEY | cut -d'=' -f2)
+        echo "Using task id of ${{ env.ce_task_id }}"
+        if [ -z "$ce_task_id" ]; then
+            echo "No task id found"
+            exit 1
+        fi
+        # grab the status of the task
+        # if CANCELLED or FAILED, fail the Build
+        # if SUCCESS, stop waiting and grab the analysisId
+        wait_for_success=true
+        count=0
+        analysis_id=""
+        while [[ "${{ env.wait_for_success }}" = "true" && $count -lt 60 ]];
+        do
+            curl -s -u "${{ env.sonar_token }}": "${{ env.SONAR_URL }}/api/ce/task?id=${{ env.ce_task_id }}" > sonar_task_status.json
+            ce_status=$(jq -r .task.status sonar_task_status.json)
+            analysis_id=$(jq -r .task.analysisId sonar_task_status.json)
+            echo "Status of SonarQube task is ${{ env.ce_status }}"
+            if [ "${{ env.ce_status }}" = "CANCELLED" ]; then
+                echo "SonarQube Compute job has been cancelled - exiting with error"
+                exit 1
+            fi
+            if [ "${{ env.ce_status }}" = "FAILED" ]; then
+                echo "SonarQube Compute job has failed - exiting with error"
+                exit 1
+            fi
+            if [ "${{ env.ce_status }}" = "SUCCESS" ]; then
+                wait_for_success=false
+            fi
+            sleep "${{ env.SLEEP_TIME }}"
+            count=$(($count+1))
+        done
+        if [ "${{ env.ce_status }}" != "SUCCESS" ]; then
+            echo "Timed out waiting for the analysis to complete"
+            exit 1
+        fi
+        # get the status of the quality gate for this analysisId
+        echo "Getting sonar project status for Analysis id ${{ env.analysis_id }}"
+        curl -s -u "${{ env.sonar_token }}": "${{ env.SONAR_URL }}/api/qualitygates/project_status?analysisId=${{ env.analysis_id }}" > sonar_project_response.json
+        qg_status=$(jq -r .projectStatus.status sonar_project_response.json)
+        echo "Quality Gate status is ${{ env.qg_status }}"
+        if [ "${{ env.qg_status }}" = "ERROR" ]; then
+            echo "Quality gate failed for below metrics"
+            for k in $(jq '.projectStatus.conditions | keys | .[]' sonar_project_response.json); do
+                value=$(jq -r ".projectStatus.conditions[$k]" sonar_project_response.json)
+                metricKey=$(jq -r '.metricKey' <<< "$value")
+                errorThreshold=$(jq -r '.errorThreshold' <<< "$value")
+                actualValue=$(jq -r '.actualValue' <<< "$value")
+                condStatus=$(jq -r '.status' <<< "$value")
+                echo "Metric - ${{ env.metricKey }}, QG Threshold - ${{ env.errorThreshold }}, Scan Threshold Count - ${{ env.actualValue }}, Metric Status - ${{ env.condStatus }}"
+            done
+            echo "Quality gate has failed, since thresholds has not been met. Failing the scan."
+            exit 1
+        fi
